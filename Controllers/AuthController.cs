@@ -30,7 +30,7 @@ namespace EFTest.Controllers
             await Task.CompletedTask;
             string userName = null;
             string password = null;
-            if (data == null)
+            if (data != null)
             {
                 userName = data.UserName;
                 password = data.Password;
