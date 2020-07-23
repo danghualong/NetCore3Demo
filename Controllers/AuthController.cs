@@ -1,5 +1,5 @@
 ﻿using EFTest.Models.Dtos;
-using EFTest.Models.Entities;
+using EFTest.Repositories;
 using EFTest.Utils;
 using IdentityModel;
 using Microsoft.AspNetCore.Mvc;
@@ -15,19 +15,20 @@ using System.Threading.Tasks;
 
 namespace EFTest.Controllers
 {
-    [Route("[controller]")]
     [ApiController]
     public class AuthController:ControllerBase
     {
         private IConfiguration configuration;
-        public AuthController(IConfiguration configuration)
+        private UserRepository userRepository;
+        public AuthController(IConfiguration configuration,UserRepository userRepository)
         {
             this.configuration = configuration;
+            this.userRepository = userRepository;
         }
+        [Route("oauth/token")]
         [HttpPost]
-        public async Task<string> LoginAsync([FromBody] UserInfo data)
+        public async Task<ActionResult<TokenDto>> LoginAsync([FromBody] UserInfo data)
         {
-            await Task.CompletedTask;
             string userName = null;
             string password = null;
             if (data != null)
@@ -35,13 +36,16 @@ namespace EFTest.Controllers
                 userName = data.UserName;
                 password = data.Password;
             }
-            
-            var user = GetUser(userName, password);
-            string token = GetToken(user);
-            return token;
+            var user = await GetUser(userName, password);
+            //if (user == null)
+            //{
+            //    return new JsonResult(new HttpResultDto(999,"用户信息不存在"));
+            //}
+            var token = GetToken(user);
+            return new JsonResult(new TokenDto() { Token = token, UserName = user.UserName });
         }
 
-        private UserInfo GetUser(string userName,string password)
+        private async Task<UserInfo> GetUser(string userName,string password)
         {
             UserInfo user = null;
             if (string.IsNullOrEmpty(userName))
@@ -50,9 +54,12 @@ namespace EFTest.Controllers
             }
             else
             {
-                //查询数据库，获取UserId
-                
-                int userId = 100;
+                var tmpUser = await userRepository.GetUserAsync(userName, password);
+                if (tmpUser==null)
+                {
+                    return null;
+                }
+                int userId = tmpUser.UserId;
                 user = new UserInfo() { Id = userId, UserName = userName };
             }
             return user;

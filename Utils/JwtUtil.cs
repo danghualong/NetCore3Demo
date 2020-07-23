@@ -1,4 +1,4 @@
-﻿using EFTest.Models.Entities;
+﻿using EFTest.Models.Dtos;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;

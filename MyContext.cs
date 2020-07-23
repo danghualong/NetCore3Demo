@@ -15,5 +15,6 @@ namespace EFTest
         }
         public DbSet<Activity> Activities { get; set; }
         public DbSet<Team> Teams { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }

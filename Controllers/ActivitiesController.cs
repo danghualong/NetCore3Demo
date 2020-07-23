@@ -9,7 +9,7 @@ namespace EFTest.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ActivityController : ControllerBase
+    public class ActivitiesController : ControllerBase
     {
         // GET: api/Activity
         [HttpGet]

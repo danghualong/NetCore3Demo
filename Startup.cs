@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EFTest.Filters;
+using EFTest.Repositories;
 using EFTest.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -29,11 +31,15 @@ namespace EFTest
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers(option=>
+            {
+                option.Filters.Add<GlobalExceptionFilter>();
+            });
             services.AddDbContext<MyContext>((optionsBuilder) =>
             {
                 optionsBuilder.UseSqlite(Configuration.GetConnectionString("db"));
             });
+            services.AddTransient<UserRepository>();
             var jwtSetting = JwtUtil.GetJwtSetting(Configuration);
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer((options) =>
@@ -48,10 +54,18 @@ namespace EFTest
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.SecretKey)),
                         ValidateLifetime = true,
                         //添加此属性过期时间才生效
-                        ClockSkew = TimeSpan.Zero
+                        //ClockSkew = TimeSpan.Zero
                     };
                 });
-
+            services.AddCors(options =>
+            {
+                options.AddPolicy("any",
+                    builder =>
+                    {
+                        builder.AllowAnyHeader()
+                        .AllowAnyOrigin().AllowAnyMethod();
+                    });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,6 +81,8 @@ namespace EFTest
             app.UseAuthentication();
 
             app.UseAuthorization();
+
+            app.UseCors("any");
 
             app.UseEndpoints(endpoints =>
             {
