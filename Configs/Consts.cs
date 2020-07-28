@@ -16,6 +16,8 @@ namespace EFTest.Configs
         Logout =601,
         [Description("用户信息不存在")]
         NoUser = 602,
+        [Description("数据参数错误")]
+        ParameterError = 700,
     }
 
     public enum UserType

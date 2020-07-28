@@ -16,6 +16,8 @@
     <Compile Remove="Migrations\20191120073354_UpdateDB1.Designer.cs" />
     <Compile Remove="Migrations\20191206095201_init.cs" />
     <Compile Remove="Migrations\20191206095201_init.Designer.cs" />
+    <Compile Remove="Migrations\20200724110948_init.cs" />
+    <Compile Remove="Migrations\20200724110948_init.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,6 +38,10 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.0.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ValidationAttributes\" />
   </ItemGroup>
 
 </Project>

@@ -73,20 +73,28 @@ namespace EFTest.Migrations
                 {
                     b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnName("id")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Password")
-                        .HasColumnType("TEXT");
+                        .IsRequired()
+                        .HasColumnName("password")
+                        .HasColumnType("TEXT")
+                        .HasMaxLength(40);
 
                     b.Property<string>("UserName")
-                        .HasColumnType("TEXT");
+                        .IsRequired()
+                        .HasColumnName("user_name")
+                        .HasColumnType("TEXT")
+                        .HasMaxLength(40);
 
                     b.Property<int>("UserType")
+                        .HasColumnName("user_type")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users");
+                    b.ToTable("user");
                 });
 #pragma warning restore 612, 618
         }

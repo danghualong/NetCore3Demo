@@ -16,7 +16,7 @@ namespace EFTest.Filters
             if (!context.ExceptionHandled)
             {
                 //http状态码是500
-                context.Result = new JsonResult(new HttpResultDto<object>(BizStatusCode.Unknown)) 
+                context.Result = new JsonResult(new HttpResultDto(BizStatusCode.Unknown)) 
                 {StatusCode=500};
             }
             context.ExceptionHandled = true;

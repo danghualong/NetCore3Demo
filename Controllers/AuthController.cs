@@ -1,5 +1,6 @@
-﻿using EFTest.Models.Dtos;
-using EFTest.Repositories;
+﻿using AutoMapper;
+using EFTest.Models.Dtos;
+using EFTest.Services;
 using EFTest.Utils;
 using IdentityModel;
 using Microsoft.AspNetCore.Mvc;
@@ -18,10 +19,13 @@ namespace EFTest.Controllers
     [ApiController]
     public class AuthController:ControllerBase
     {
+        private IMapper mapper;
         private IConfiguration configuration;
         private UserRepository userRepository;
-        public AuthController(IConfiguration configuration,UserRepository userRepository)
+        public AuthController(IConfiguration configuration,IMapper mapper,
+            UserRepository userRepository)
         {
+            this.mapper = mapper;
             this.configuration = configuration;
             this.userRepository = userRepository;
         }
@@ -42,7 +46,8 @@ namespace EFTest.Controllers
             //    return new JsonResult(new HttpResultDto(999,"用户信息不存在"));
             //}
             var token = GetToken(user);
-            return new JsonResult(new TokenDto() { Token = token, UserName = user.UserName });
+            var objToken = new TokenDto() { Token = token, UserName = user.UserName };
+            return new JsonResult(new HttpResultDto<TokenDto>(objToken));
         }
 
         private async Task<UserInfo> GetUser(string userName,string password)
@@ -59,6 +64,7 @@ namespace EFTest.Controllers
                 {
                     return null;
                 }
+                //user = mapper.Map<UserInfo>(tmpUser);
                 int userId = tmpUser.UserId;
                 user = new UserInfo() { Id = userId, UserName = userName };
             }

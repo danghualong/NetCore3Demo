@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using EFTest.Filters;
-using EFTest.Repositories;
+using EFTest.Services;
 using EFTest.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -34,6 +35,24 @@ namespace EFTest
             services.AddControllers(option=>
             {
                 option.Filters.Add<GlobalExceptionFilter>();
+            });
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.InvalidModelStateResponseFactory = (context) =>
+                {
+                    //StringBuilder errTxt = new StringBuilder();
+                    //foreach (var item in context.ModelState.Values)
+                    //{
+                    //    foreach (var error in item.Errors)
+                    //    {
+                    //        errTxt.Append(error.ErrorMessage + "|");
+                    //    }
+                    //}
+
+                    ////ApiResp result = new ApiResp(ApiRespCode.F400000, errTxt.ToString().Substring(0, errTxt.Length - 1));
+                    //return new JsonResult(new { Errors = errTxt.ToString().Substring(0, errTxt.Length - 1) });
+                    return ModelStateValidationFactory.CreateModelStateActionResult(context);
+                };
             });
             services.AddDbContext<MyContext>((optionsBuilder) =>
             {
@@ -66,6 +85,7 @@ namespace EFTest
                         .AllowAnyOrigin().AllowAnyMethod();
                     });
             });
+            services.AddAutoMapper(this.GetType().Assembly);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace EFTest.Repositories
+namespace EFTest.Services
 {
     public class UserRepository
     {
