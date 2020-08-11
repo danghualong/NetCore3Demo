@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EFTest.Models.Dtos;
+using EFTest.Models.Entities;
 using EFTest.Services;
 using EFTest.Utils;
 using IdentityModel;
@@ -41,13 +42,29 @@ namespace EFTest.Controllers
                 password = data.Password;
             }
             var user = await GetUser(userName, password);
-            //if (user == null)
-            //{
-            //    return new JsonResult(new HttpResultDto(999,"用户信息不存在"));
-            //}
+            if (user == null)
+            {
+                return new JsonResult(new HttpResultDto(Configs.BizStatusCode.NoUser));
+            }
             var token = GetToken(user);
             var objToken = new TokenDto() { Token = token, UserName = user.UserName };
             return new JsonResult(new HttpResultDto<TokenDto>(objToken));
+        }
+        [Route("register")]
+        [HttpPost]
+        public async Task<ActionResult<TokenDto>> RegisterAsync([FromBody] RegisterDto data)
+        {
+            var objUser = new User() { UserName = data.UserName, Password = data.Password, UserType = 1 };
+            var user = await userRepository.Register(objUser);
+            if (user != null)
+            {
+                var userInfo= mapper.Map<UserInfo>(user);
+                return new JsonResult(new HttpResultDto<UserInfo>(userInfo));
+            }
+            else
+            {
+                return new JsonResult(new HttpResultDto(Configs.BizStatusCode.CreateUserFailed));
+            }
         }
 
         private async Task<UserInfo> GetUser(string userName,string password)

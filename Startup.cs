@@ -58,7 +58,7 @@ namespace EFTest
             {
                 optionsBuilder.UseSqlite(Configuration.GetConnectionString("db"));
             });
-            services.AddTransient<UserRepository>();
+            services.AddScoped<UserRepository>();
             var jwtSetting = JwtUtil.GetJwtSetting(Configuration);
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer((options) =>

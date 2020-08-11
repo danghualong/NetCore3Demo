@@ -16,6 +16,8 @@ namespace EFTest.Configs
         Logout =601,
         [Description("用户信息不存在")]
         NoUser = 602,
+        [Description("创建用户失败")]
+        CreateUserFailed = 603,
         [Description("数据参数错误")]
         ParameterError = 700,
     }
