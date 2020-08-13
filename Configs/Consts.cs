@@ -18,6 +18,8 @@ namespace EFTest.Configs
         NoUser = 602,
         [Description("创建用户失败")]
         CreateUserFailed = 603,
+        [Description("Token已过期")]
+        TokenExpired = 604,
         [Description("数据参数错误")]
         ParameterError = 700,
     }

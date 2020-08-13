@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using EFTest.Models.Dtos;
 using EFTest.Models.Entities;
+using EFTest.Repos;
 using EFTest.Services;
 using EFTest.Utils;
 using IdentityModel;
@@ -22,13 +23,15 @@ namespace EFTest.Controllers
     {
         private IMapper mapper;
         private IConfiguration configuration;
-        private UserRepository userRepository;
+        private UserService userService;
+        private TokenService tokenService;
         public AuthController(IConfiguration configuration,IMapper mapper,
-            UserRepository userRepository)
+            TokenService tokenService,UserService userService)
         {
             this.mapper = mapper;
             this.configuration = configuration;
-            this.userRepository = userRepository;
+            this.tokenService = tokenService;
+            this.userService = userService;
         }
         [Route("oauth/token")]
         [HttpPost]
@@ -41,21 +44,19 @@ namespace EFTest.Controllers
                 userName = data.UserName;
                 password = data.Password;
             }
-            var user = await GetUser(userName, password);
+            var user = await userService.GetUser(userName, password);
             if (user == null)
             {
                 return new JsonResult(new HttpResultDto(Configs.BizStatusCode.NoUser));
             }
-            var token = GetToken(user);
-            var objToken = new TokenDto() { Token = token, UserName = user.UserName };
+            var objToken = tokenService.BuildToken(user);
             return new JsonResult(new HttpResultDto<TokenDto>(objToken));
         }
         [Route("register")]
         [HttpPost]
         public async Task<ActionResult<TokenDto>> RegisterAsync([FromBody] RegisterDto data)
         {
-            var objUser = new User() { UserName = data.UserName, Password = data.Password, UserType = 1 };
-            var user = await userRepository.Register(objUser);
+            var user = await userService.Register(data);
             if (user != null)
             {
                 var userInfo= mapper.Map<UserInfo>(user);
@@ -66,51 +67,20 @@ namespace EFTest.Controllers
                 return new JsonResult(new HttpResultDto(Configs.BizStatusCode.CreateUserFailed));
             }
         }
-
-        private async Task<UserInfo> GetUser(string userName,string password)
+        [Route("oauth/refresh")]
+        [HttpPost]
+        public async Task<ActionResult<TokenDto>> RefreshTokenAsync([FromBody] TokenDto data)
         {
-            UserInfo user = null;
-            if (string.IsNullOrEmpty(userName))
+            var result=tokenService.RefreshToken(data);
+            if (result)
             {
-                user = new UserInfo() { Id = 0, UserName = "Anonymous" };
+                return new JsonResult(new HttpResultDto<TokenDto>(data));
             }
             else
             {
-                var tmpUser = await userRepository.GetUserAsync(userName, password);
-                if (tmpUser==null)
-                {
-                    return null;
-                }
-                //user = mapper.Map<UserInfo>(tmpUser);
-                int userId = tmpUser.UserId;
-                user = new UserInfo() { Id = userId, UserName = userName };
+                return new JsonResult(new HttpResultDto(Configs.BizStatusCode.TokenExpired));
             }
-            return user;
-        }
-
-        private string GetToken(UserInfo user)
-        {
-            var jwtSetting = JwtUtil.GetJwtSetting(configuration);
-            var curTime = DateTime.Now;
-            var expireTime= curTime.AddSeconds(jwtSetting.ExpireSeconds);
-            var claims = new Claim[]{
-                new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
-                new Claim("id",user.Id.ToString()),
-                new Claim("name",user.UserName),
-                new Claim("isAdmin",user.IsAdmin.ToString())
-            };
             
-            var ssk= new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.SecretKey));
-            var sc = new SigningCredentials(ssk, SecurityAlgorithms.HmacSha256);
-            JwtSecurityToken jst = new JwtSecurityToken(
-                issuer: jwtSetting.Issuer,
-                audience: jwtSetting.Audience,
-                claims: claims,
-                notBefore: curTime,
-                expires: expireTime,
-                signingCredentials: sc) ;
-            string token=new JwtSecurityTokenHandler().WriteToken(jst);
-            return token;
         }
     }
 }

@@ -19,6 +19,10 @@ namespace EFTest.Utils
             int expireSeconds = 0;
             int.TryParse(strSeconds, out expireSeconds);
             jwtSetting.ExpireSeconds = expireSeconds <= 0 ? 300 : expireSeconds;
+            strSeconds = configuration["JwtSettings:RefreshExpireSeconds"];
+            expireSeconds = 0;
+            int.TryParse(strSeconds, out expireSeconds);
+            jwtSetting.RefreshExpireSeconds = expireSeconds <= 0 ? 86400 : expireSeconds;
             return jwtSetting;
         }
     }

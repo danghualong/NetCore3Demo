@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using EFTest.Filters;
+using EFTest.Repos;
 using EFTest.Services;
 using EFTest.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -15,7 +16,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace EFTest
@@ -32,10 +32,7 @@ namespace EFTest
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers(option=>
-            {
-                option.Filters.Add<GlobalExceptionFilter>();
-            });
+            //配置验证失败返回结果
             services.Configure<ApiBehaviorOptions>(options =>
             {
                 options.InvalidModelStateResponseFactory = (context) =>
@@ -54,11 +51,20 @@ namespace EFTest
                     return ModelStateValidationFactory.CreateModelStateActionResult(context);
                 };
             });
+            //配置数据库连接信息
             services.AddDbContext<MyContext>((optionsBuilder) =>
             {
                 optionsBuilder.UseSqlite(Configuration.GetConnectionString("db"));
             });
+            //配置全局异常过滤器
+            services.AddControllers(option =>
+            {
+                option.Filters.Add<GlobalExceptionFilter>();
+            });
             services.AddScoped<UserRepository>();
+            services.AddScoped<UserService>();
+            services.AddScoped<TokenService>();
+            //配置Token验证规则
             var jwtSetting = JwtUtil.GetJwtSetting(Configuration);
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer((options) =>
@@ -73,9 +79,21 @@ namespace EFTest
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.SecretKey)),
                         ValidateLifetime = true,
                         //添加此属性过期时间才生效
-                        //ClockSkew = TimeSpan.Zero
+                        ClockSkew = TimeSpan.Zero
+                    };
+                    options.Events = new JwtBearerEvents()
+                    {
+                        OnAuthenticationFailed = (context) =>
+                        {
+                            if(typeof(SecurityTokenExpiredException) == context.Exception.GetType())
+                            {
+                                context.Response.Headers.Add("reason", "token expired");
+                            }
+                            return Task.CompletedTask;
+                        }
                     };
                 });
+            //配置允许跨域访问
             services.AddCors(options =>
             {
                 options.AddPolicy("any",
@@ -85,6 +103,7 @@ namespace EFTest
                         .AllowAnyOrigin().AllowAnyMethod();
                     });
             });
+            //配置entity和dto的映射规则
             services.AddAutoMapper(this.GetType().Assembly);
         }
 
@@ -108,6 +127,7 @@ namespace EFTest
             {
                 endpoints.MapControllers();
             });
+            //初始化数据
             new DBInitializer(dbContext).InitializeDb();
         }
     }

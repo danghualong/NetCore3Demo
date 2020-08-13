@@ -11,5 +11,6 @@ namespace EFTest.Models.Dtos
         public string Issuer { get; set; }
         public string SecretKey { get; set; }
         public int ExpireSeconds { get; set; } = 300;
+        public int RefreshExpireSeconds { get; set; } = 86400;
     }
 }

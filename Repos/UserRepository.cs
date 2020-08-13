@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace EFTest.Services
+namespace EFTest.Repos
 {
     public class UserRepository
     {
@@ -23,8 +23,13 @@ namespace EFTest.Services
 
         public async Task<User> Register(User user)
         {
+            var tmpUser = await dbContext.Users.FirstAsync(p => p.UserName == user.UserName);
+            if (tmpUser != null)
+            {
+                return null;
+            }
             dbContext.Users.Add(user);
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
             return user;
         }
     }
