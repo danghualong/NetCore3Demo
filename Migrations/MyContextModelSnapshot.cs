@@ -28,6 +28,10 @@ namespace EFTest.Migrations
                         .HasColumnType("varchar")
                         .HasMaxLength(40);
 
+                    b.Property<int>("Status")
+                        .HasColumnName("status")
+                        .HasColumnType("tinyint");
+
                     b.Property<string>("Summary")
                         .HasColumnName("remark")
                         .HasColumnType("varchar")

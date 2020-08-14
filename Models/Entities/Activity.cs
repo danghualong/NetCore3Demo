@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -20,5 +21,7 @@ namespace EFTest.Models.Entities
         [Column("remark", TypeName = "varchar")]
         [StringLength(100)]
         public string Summary { get; set; }
+        [Column("status", TypeName = "tinyint")]
+        public int Status { get; set; } = 0;
     }
 }

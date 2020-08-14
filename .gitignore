@@ -3,3 +3,5 @@ bin
 obj
 Migrations
 /*.user
+/reception.db-shm
+/reception.db-wal

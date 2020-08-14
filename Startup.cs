@@ -5,18 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using EFTest.Filters;
+using EFTest.Models.Dtos;
 using EFTest.Repos;
 using EFTest.Services;
 using EFTest.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 
 namespace EFTest
 {
@@ -83,12 +86,22 @@ namespace EFTest
                     };
                     options.Events = new JwtBearerEvents()
                     {
-                        OnAuthenticationFailed = (context) =>
+                        //OnAuthenticationFailed = (context) =>
+                        //{
+                        //    //if (typeof(SecurityTokenExpiredException) == context.Exception.GetType())
+                        //    //{
+                        //    //    context.Response.Headers.Add("reason", "token expired");
+                        //    //}
+                        //    //return Task.CompletedTask;
+                        //},
+                        //Token验证失败的回调事件
+                        OnChallenge = context =>
                         {
-                            if(typeof(SecurityTokenExpiredException) == context.Exception.GetType())
-                            {
-                                context.Response.Headers.Add("reason", "token expired");
-                            }
+                            context.HandleResponse();
+                            var content=JsonConvert.SerializeObject(new HttpResultDto(Configs.BizStatusCode.TokenExpired));
+                            context.Response.StatusCode = StatusCodes.Status200OK;
+                            context.Response.ContentType = "application/json";
+                            context.Response.WriteAsync(content);
                             return Task.CompletedTask;
                         }
                     };
