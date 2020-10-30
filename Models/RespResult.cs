@@ -5,31 +5,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace EFTest.Models.Dtos
+namespace EFTest.Models
 {
-    public class HttpResultDto<T>
+    public class RespResult<T>
     {
         public int Code { get; set; }
         public string Error { get; set; }
         public  T Content { get; set; }
-        public HttpResultDto(T content) 
+        public RespResult(T content) 
         {
             this.Code = (int)BizStatusCode.Success;
             this.Content = content;
         }
-        public HttpResultDto()
+        public RespResult()
         {
             this.Code= (int)BizStatusCode.Success;
         }
     }
 
-    public class HttpResultDto : HttpResultDto<string>
+    public class RespResult : RespResult<string>
     {
         /// <summary>
         /// 有错误状态码
         /// </summary>
         /// <param name="errorCode"></param>
-        public HttpResultDto(BizStatusCode errorCode) : this(errorCode, string.Empty)
+        public RespResult(BizStatusCode errorCode) : this(errorCode, string.Empty)
         {
         }
         /// <summary>
@@ -37,7 +37,7 @@ namespace EFTest.Models.Dtos
         /// </summary>
         /// <param name="errorCode"></param>
         /// <param name="errorMessage"></param>
-        public HttpResultDto(BizStatusCode errorCode, string errorMessage)
+        public RespResult(BizStatusCode errorCode, string errorMessage)
         {
             this.Code = (int)errorCode;
             this.Error = errorMessage;
@@ -50,6 +50,12 @@ namespace EFTest.Models.Dtos
                     this.Error = codeMsg;
                 }
             }
+        }
+
+        public RespResult(int errorCode, string errorMessage)
+        {
+            this.Code = errorCode;
+            this.Error = errorMessage;
         }
     }
 }

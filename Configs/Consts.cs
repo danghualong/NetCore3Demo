@@ -22,6 +22,12 @@ namespace EFTest.Configs
         TokenExpired = 604,
         [Description("数据参数错误")]
         ParameterError = 700,
+        [Description("未授权")]
+        Unauthorize = 401,
+        [Description("未找到服务")]
+        NoFound = 404,
+        [Description("请求错误")]
+        BadGateway = 502,
     }
 
     public enum UserType

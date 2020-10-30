@@ -1,4 +1,5 @@
 ﻿using EFTest.Configs;
+using EFTest.Models;
 using EFTest.Models.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -16,7 +17,7 @@ namespace EFTest.Filters
             if (!context.ExceptionHandled)
             {
                 //http状态码是500
-                context.Result = new JsonResult(new HttpResultDto(BizStatusCode.Unknown)) 
+                context.Result = new JsonResult(new RespResult(BizStatusCode.Unknown)) 
                 {StatusCode=500};
             }
             context.ExceptionHandled = true;

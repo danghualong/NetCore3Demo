@@ -1,4 +1,5 @@
-﻿using EFTest.Models.Dtos;
+﻿using AutoMapper;
+using EFTest.Models.Dtos;
 using EFTest.Models.Entities;
 using EFTest.Repos;
 using System;
@@ -11,9 +12,11 @@ namespace EFTest.Services
     public class UserService
     {
         private UserRepository userRepository;
-        public UserService(UserRepository userRepository)
+        private IMapper mapper;
+        public UserService(UserRepository userRepository, IMapper mapper)
         {
             this.userRepository = userRepository;
+            this.mapper = mapper;
         }
 
         public async Task<UserInfo> GetUser(string userName, string password)
@@ -37,11 +40,15 @@ namespace EFTest.Services
             return user;
         }
 
-        public async Task<User> Register(RegisterDto data)
+        public async Task<UserInfo> Register(RegisterDto data)
         {
             var objUser = new User() { UserName = data.UserName, Password = data.Password, UserType = 1 };
             var user = await userRepository.Register(objUser);
-            return user;
+            if (user != null)
+            {
+                return mapper.Map<UserInfo>(user);
+            }
+            return null;
         }
     }
 }

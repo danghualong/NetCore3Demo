@@ -23,7 +23,7 @@ namespace EFTest.Repos
 
         public async Task<User> Register(User user)
         {
-            var tmpUser = await dbContext.Users.FirstAsync(p => p.UserName == user.UserName);
+            var tmpUser = await dbContext.Users.FirstOrDefaultAsync(p => p.UserName == user.UserName);
             if (tmpUser != null)
             {
                 return null;

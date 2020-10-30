@@ -5,12 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using EFTest.Filters;
+using EFTest.Models;
 using EFTest.Models.Dtos;
 using EFTest.Repos;
 using EFTest.Services;
 using EFTest.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -60,9 +62,10 @@ namespace EFTest
                 optionsBuilder.UseSqlite(Configuration.GetConnectionString("db"));
             });
             //配置全局异常过滤器
-            services.AddControllers(option =>
+            //如果使用异常处理中间件，则无需该过滤器
+            services.AddControllers(options =>
             {
-                option.Filters.Add<GlobalExceptionFilter>();
+                //options.Filters.Add<GlobalExceptionFilter>();
             });
             services.AddScoped<UserRepository>();
             services.AddScoped<UserService>();
@@ -98,7 +101,7 @@ namespace EFTest
                         OnChallenge = context =>
                         {
                             context.HandleResponse();
-                            var content=JsonConvert.SerializeObject(new HttpResultDto(Configs.BizStatusCode.TokenExpired));
+                            var content=JsonConvert.SerializeObject(new RespResult(Configs.BizStatusCode.TokenExpired));
                             context.Response.StatusCode = StatusCodes.Status200OK;
                             context.Response.ContentType = "application/json";
                             context.Response.WriteAsync(content);
@@ -123,10 +126,12 @@ namespace EFTest
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env,MyContext dbContext)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            //if (env.IsDevelopment())
+            //{
+            //    app.UseDeveloperExceptionPage();
+            //}
+            
+            app.UseMiddleware<ErrorHandlingMiddleware>();
 
             app.UseRouting();
 

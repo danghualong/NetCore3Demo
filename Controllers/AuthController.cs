@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EFTest.Models.Dtos;
+using EFTest.Models;
 using EFTest.Models.Entities;
 using EFTest.Repos;
 using EFTest.Services;
@@ -21,14 +22,12 @@ namespace EFTest.Controllers
     [ApiController]
     public class AuthController:ControllerBase
     {
-        private IMapper mapper;
         private IConfiguration configuration;
         private UserService userService;
         private TokenService tokenService;
-        public AuthController(IConfiguration configuration,IMapper mapper,
+        public AuthController(IConfiguration configuration,
             TokenService tokenService,UserService userService)
         {
-            this.mapper = mapper;
             this.configuration = configuration;
             this.tokenService = tokenService;
             this.userService = userService;
@@ -47,24 +46,23 @@ namespace EFTest.Controllers
             var user = await userService.GetUser(userName, password);
             if (user == null)
             {
-                return new JsonResult(new HttpResultDto(Configs.BizStatusCode.NoUser));
+                return new JsonResult(new RespResult(Configs.BizStatusCode.NoUser));
             }
             var objToken = tokenService.BuildToken(user);
-            return new JsonResult(new HttpResultDto<TokenDto>(objToken));
+            return new JsonResult(new RespResult<TokenDto>(objToken));
         }
         [Route("register")]
         [HttpPost]
         public async Task<ActionResult<TokenDto>> RegisterAsync([FromBody] RegisterDto data)
         {
-            var user = await userService.Register(data);
-            if (user != null)
+            var userInfo = await userService.Register(data);
+            if (userInfo != null)
             {
-                var userInfo= mapper.Map<UserInfo>(user);
-                return new JsonResult(new HttpResultDto<UserInfo>(userInfo));
+                return new JsonResult(new RespResult<UserInfo>(userInfo));
             }
             else
             {
-                return new JsonResult(new HttpResultDto(Configs.BizStatusCode.CreateUserFailed));
+                return new JsonResult(new RespResult(Configs.BizStatusCode.CreateUserFailed));
             }
         }
         [Route("oauth/refresh")]
@@ -74,11 +72,11 @@ namespace EFTest.Controllers
             var result=tokenService.RefreshToken(data);
             if (result)
             {
-                return new JsonResult(new HttpResultDto<TokenDto>(data));
+                return new JsonResult(new RespResult<TokenDto>(data));
             }
             else
             {
-                return new JsonResult(new HttpResultDto(Configs.BizStatusCode.TokenExpired));
+                return new JsonResult(new RespResult(Configs.BizStatusCode.TokenExpired));
             }
             
         }

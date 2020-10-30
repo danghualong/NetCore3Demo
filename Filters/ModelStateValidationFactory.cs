@@ -1,4 +1,5 @@
 ﻿using EFTest.Configs;
+using EFTest.Models;
 using EFTest.Models.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -15,7 +16,7 @@ namespace EFTest.Filters
         public static IActionResult CreateModelStateActionResult(ActionContext context)
         {
             string errorMsg = GetErrorMessage(context.ModelState);
-            return new JsonResult(new HttpResultDto(BizStatusCode.ParameterError, errorMsg)) { StatusCode=400 };
+            return new JsonResult(new RespResult(BizStatusCode.ParameterError, errorMsg)) { StatusCode=400 };
         }
 
         private static string GetErrorMessage(ModelStateDictionary modelState,string sep="\r\n")
